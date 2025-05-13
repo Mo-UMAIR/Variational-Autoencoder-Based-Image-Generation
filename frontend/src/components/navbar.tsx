@@ -39,17 +39,7 @@ export default function Navbar() {
           >
             Regenerate
           </Link>
-          <Button asChild>
-            <Link
-              href="#regenerate"
-              onClick={(e) => {
-                e.preventDefault()
-                document.getElementById("regenerate")?.scrollIntoView({ behavior: "smooth" })
-              }}
-            >
-              Try Now
-            </Link>
-          </Button>
+          
         </nav>
 
         {/* Mobile Menu Button */}
