@@ -1,7 +1,6 @@
 // src/components/ui/button.tsx
 
 import React from 'react';
-import clsx from 'clsx'; // optional but helps with clean conditional classes
 
 type Variant = 'default' | 'outline' | 'ghost';
 
@@ -19,16 +18,25 @@ export const Button: React.FC<ButtonProps> = ({
   variant = 'default',
 }) => {
   const baseStyles = 'px-4 py-2 rounded-md focus:outline-none transition-colors';
-  const variantStyles = {
-    default: 'bg-blue-500 text-white hover:bg-blue-600',
-    outline: 'border border-gray-300 text-gray-800 bg-white hover:bg-gray-100',
-    ghost: 'bg-transparent text-gray-800 hover:bg-gray-100',
-  };
+  let variantStyles = '';
+
+  switch (variant) {
+    case 'outline':
+      variantStyles = 'border border-gray-300 text-gray-800 bg-white hover:bg-gray-100';
+      break;
+    case 'ghost':
+      variantStyles = 'bg-transparent text-gray-800 hover:bg-gray-100';
+      break;
+    case 'default':
+    default:
+      variantStyles = 'bg-blue-500 text-white hover:bg-blue-600';
+      break;
+  }
 
   return (
     <button
       onClick={onClick}
-      className={clsx(baseStyles, variantStyles[variant], className)}
+      className={`${baseStyles} ${variantStyles} ${className}`}
     >
       {children}
     </button>
