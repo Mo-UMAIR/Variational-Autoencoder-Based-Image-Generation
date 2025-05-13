@@ -43,7 +43,8 @@ export default function Navbar() {
         </nav>
 
         {/* Mobile Menu Button */}
-        <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+        <Button className="md:hidden p-2 rounded-full" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+
           {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           <span className="sr-only">Toggle menu</span>
         </Button>
