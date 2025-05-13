@@ -9,6 +9,7 @@ interface ButtonProps {
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   className?: string;
   variant?: Variant;
+  disabled?: boolean;  // Add the disabled prop here
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -16,6 +17,7 @@ export const Button: React.FC<ButtonProps> = ({
   onClick,
   className = '',
   variant = 'default',
+  disabled = false,  // Default to false
 }) => {
   const baseStyles = 'px-4 py-2 rounded-md focus:outline-none transition-colors';
   let variantStyles = '';
@@ -37,6 +39,7 @@ export const Button: React.FC<ButtonProps> = ({
     <button
       onClick={onClick}
       className={`${baseStyles} ${variantStyles} ${className}`}
+      disabled={disabled}  // Apply the disabled prop to the button
     >
       {children}
     </button>
