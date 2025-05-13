@@ -147,8 +147,7 @@ export default function RegenerationSection() {
                         />
                       </div>
                       <Button
-                        variant="ghost"
-                        size="icon"
+                        
                         className="absolute top-2 right-2 bg-background/80 hover:bg-background"
                         onClick={clearImage}
                       >
