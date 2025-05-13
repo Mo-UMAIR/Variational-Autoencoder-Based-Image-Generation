@@ -1,13 +1,21 @@
-# main.py
-
+import os
+import logging
+import numpy as np
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from keras.layers import TFSMLayer
-import numpy as np
 from PIL import Image
 import io
 import base64
+import tensorflow as tf
+
+# Force CPU usage for TensorFlow on Render
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Forces TensorFlow to use CPU only
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -20,8 +28,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load model
-vae = TFSMLayer("vae_model", call_endpoint="serving_default")
+# Load model (use tf.saved_model.load for TensorFlow models)
+vae = tf.saved_model.load('path_to_vae_model')  # Update this path
 
 @app.get("/")
 def read_root():
@@ -33,10 +41,10 @@ def preprocess(image_bytes, size=(128, 128)):
         image = image.resize(size)
         image_array = np.array(image).astype(np.float32) / 255.0
         image_tensor = np.expand_dims(image_array, axis=0)
-        print(f"[INFO] Preprocessed image shape: {image_tensor.shape}")
+        logger.info(f"[INFO] Preprocessed image shape: {image_tensor.shape}")
         return image_tensor
     except Exception as e:
-        print(f"[ERROR] Preprocessing failed: {e}")
+        logger.error(f"[ERROR] Preprocessing failed: {e}")
         raise
 
 @app.post("/predict")
@@ -45,12 +53,12 @@ async def predict(file: UploadFile = File(...)):
         image_bytes = await file.read()
         input_tensor = preprocess(image_bytes)
 
-        print("[INFO] Sending to VAE model...")
+        logger.info("[INFO] Sending to VAE model...")
         output_raw = vae(input_tensor)
-        print(f"[DEBUG] Model output keys: {output_raw.keys()}")  # Debug print
+        logger.debug(f"[DEBUG] Model output: {output_raw}")  # Debug print
 
-        output_tensor = output_raw["output_0"]  # Use the correct key here
-        print(f"[INFO] Output tensor shape: {output_tensor.shape}")
+        output_tensor = output_raw["output_0"]  # Use correct key here
+        logger.info(f"[INFO] Output tensor shape: {output_tensor.shape}")
 
         output_image = np.clip(output_tensor[0].numpy() * 255, 0, 255).astype(np.uint8)
         image_pil = Image.fromarray(output_image)
@@ -62,8 +70,11 @@ async def predict(file: UploadFile = File(...)):
         return JSONResponse(content={"image_base64": img_str})
 
     except Exception as e:
-        print(f"[ERROR] Exception: {e}")
+        logger.error(f"[ERROR] Exception: {e}")
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 
-#   uvicorn main:app --reload
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))  # Render provides $PORT
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
